@@ -1,3 +1,4 @@
+import React from 'react'
 import { Bars3Icon, BellIcon } from '@heroicons/react/24/outline'
 
 const viewTitles = {
