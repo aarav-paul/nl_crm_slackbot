@@ -1,21 +1,20 @@
 #!/usr/bin/env python3
 """
-Salesforce OAuth Setup Script
-This script helps you set up OAuth authentication with Salesforce.
+Simple Salesforce OAuth Setup Script with PKCE
 """
 
 import os
 import webbrowser
 from dotenv import load_dotenv
-from salesforce_auth import SalesforceAuth
+from salesforce_oauth import SalesforceOAuth
 
 def main():
     load_dotenv()
     
-    print("🚀 Salesforce OAuth Setup")
+    print("🚀 Salesforce OAuth Setup (PKCE)")
     print("=" * 50)
     
-    # Check if environment variables are set
+    # Check environment variables
     client_id = os.environ.get("SALESFORCE_CLIENT_ID")
     client_secret = os.environ.get("SALESFORCE_CLIENT_SECRET")
     
@@ -24,21 +23,21 @@ def main():
         print("\nPlease add these to your .env file:")
         print("SALESFORCE_CLIENT_ID=your_consumer_key_here")
         print("SALESFORCE_CLIENT_SECRET=your_consumer_secret_here")
-        print("SALESFORCE_REDIRECT_URI=https://httpbin.org/get")
-        print("SALESFORCE_ENVIRONMENT=production  # or 'sandbox' for test org")
+        print("SALESFORCE_REDIRECT_URI=https://example.com")
+        print("SALESFORCE_ENVIRONMENT=production")
         return
     
-    # Initialize Salesforce auth
-    sf_auth = SalesforceAuth()
+    # Initialize OAuth
+    oauth = SalesforceOAuth()
     
     print("✅ Environment variables loaded")
     print(f"📋 Client ID: {client_id[:10]}...")
-    print(f"🔗 Redirect URI: {sf_auth.redirect_uri}")
+    print(f"🔗 Redirect URI: {oauth.redirect_uri}")
     print()
     
-    # Generate authorization URL with PKCE
     try:
-        auth_url, code_verifier = sf_auth.get_authorization_url()
+        # Generate authorization URL with PKCE
+        auth_url, code_verifier = oauth.get_authorization_url()
         print("🔐 Generated authorization URL with PKCE")
         print()
         print("📝 Next steps:")
@@ -49,7 +48,7 @@ def main():
         print("5. Paste it when prompted")
         print()
         
-        # Ask user if they want to open the browser
+        # Ask to open browser
         open_browser = input("🌐 Open authorization URL in browser? (y/n): ").lower().strip()
         if open_browser == 'y':
             webbrowser.open(auth_url)
@@ -58,7 +57,7 @@ def main():
         print(auth_url)
         print()
         
-        # Get authorization code from user
+        # Get authorization code
         auth_code = input("📋 Enter the authorization code: ").strip()
         
         if not auth_code:
@@ -67,10 +66,10 @@ def main():
         
         # Exchange code for token with PKCE
         print("🔄 Exchanging authorization code for access token...")
-        token_data = sf_auth.exchange_code_for_token(auth_code, code_verifier)
+        token_data = oauth.exchange_code_for_token(auth_code, code_verifier)
         
         # Save credentials
-        sf_auth.save_credentials(token_data)
+        oauth.save_credentials(token_data)
         
         print("✅ OAuth setup completed successfully!")
         print(f"🏢 Instance URL: {token_data['instance_url']}")
