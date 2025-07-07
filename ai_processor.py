@@ -15,13 +15,36 @@ class AIProcessor:
 You are an AI assistant that converts natural language commands into structured JSON for Salesforce operations.
 
 Parse the following user command and return ONLY a valid JSON object with this structure:
+
+For UPDATE operations:
 {{
   "tool": "salesforce",
-  "action": "update|create|delete|query",
+  "action": "update",
   "object": "Lead|Contact|Account|Opportunity",
-  "filters": {{"field": "value"}},
-  "fields": {{"field": "value"}}
+  "filters": {{"Name": "value"}},
+  "fields": {{"Status": "value", "Email": "value"}}
 }}
+
+For CREATE operations:
+{{
+  "tool": "salesforce",
+  "action": "create",
+  "object": "Lead|Contact|Account|Opportunity",
+  "fields": {{"Name": "value", "Email": "value", "Status": "value"}}
+}}
+
+For DELETE operations:
+{{
+  "tool": "salesforce",
+  "action": "delete",
+  "object": "Lead|Contact|Account|Opportunity",
+  "filters": {{"Name": "value"}}
+}}
+
+Examples:
+- "update John Doe's lead status to Qualified" → {{"tool": "salesforce", "action": "update", "object": "Lead", "filters": {{"Name": "John Doe"}}, "fields": {{"Status": "Qualified"}}}}
+- "create a new lead for Jane Smith with email jane@example.com" → {{"tool": "salesforce", "action": "create", "object": "Lead", "fields": {{"LastName": "Smith", "FirstName": "Jane", "Email": "jane@example.com", "Company": "Smith Corp"}}}}
+- "delete the lead for Mike Johnson" → {{"tool": "salesforce", "action": "delete", "object": "Lead", "filters": {{"Name": "Mike Johnson"}}}}
 
 User command: "{user_input}"
 
@@ -81,9 +104,26 @@ Return ONLY the JSON object, no additional text or explanation.
             return f"❌ *Error parsing command:*\n{result['error']}\n\nPlease try rephrasing your request."
         
         parsed = result["parsed_command"]
+        action = parsed.get('action', 'Unknown')
+        object_type = parsed.get('object', 'Unknown')
         
-        # Format the JSON nicely for Slack
-        json_preview = json.dumps(parsed, indent=2)
+        # Create action-specific summaries
+        if action == "create":
+            fields = parsed.get('fields', {})
+            summary = f"Create new {object_type} with {len(fields)} field(s)"
+            details = "\n".join([f"• {k}: {v}" for k, v in fields.items()])
+        elif action == "delete":
+            filters = parsed.get('filters', {})
+            summary = f"Delete {object_type} matching {len(filters)} filter(s)"
+            details = "\n".join([f"• {k}: {v}" for k, v in filters.items()])
+        elif action == "update":
+            filters = parsed.get('filters', {})
+            fields = parsed.get('fields', {})
+            summary = f"Update {object_type} with {len(fields)} field(s)"
+            details = f"Filters: {', '.join([f'{k}={v}' for k, v in filters.items()])}\nFields: {', '.join([f'{k}={v}' for k, v in fields.items()])}"
+        else:
+            summary = f"Unknown action: {action}"
+            details = "No details available"
         
         message = f"""
 🤖 *AI Command Parsed Successfully!*
@@ -92,19 +132,16 @@ Return ONLY the JSON object, no additional text or explanation.
 `{result['original_input']}`
 
 *Parsed Action:*
-```json
-{json_preview}
-```
-
-*Summary:*
 • **Tool:** {parsed.get('tool', 'Unknown')}
-• **Action:** {parsed.get('action', 'Unknown')}
-• **Object:** {parsed.get('object', 'Unknown')}
-• **Filters:** {len(parsed.get('filters', {}))} filter(s)
-• **Fields:** {len(parsed.get('fields', {}))} field(s)
+• **Action:** {action}
+• **Object:** {object_type}
+• **Summary:** {summary}
+
+*Details:*
+{details}
 
 *Next Steps:*
-This is where we'll add Salesforce integration and confirmation workflows!
+This command will be processed by the Salesforce integration.
         """
         
         return message.strip() 

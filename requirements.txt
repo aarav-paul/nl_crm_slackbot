@@ -1,6 +1,22 @@
+# Slack Integration
 slack-bolt==1.18.1
+
+# Environment Management
 python-dotenv==1.0.0
+
+# AI Processing
 openai>=1.50.0
+
+# Authentication
 authlib>=1.2.0
+
+# HTTP Requests
 requests>=2.31.0
-simple-salesforce>=1.12.0 
+
+# Salesforce Integration
+simple-salesforce>=1.12.0
+
+# Development (optional)
+pytest>=7.0.0
+black>=23.0.0
+flake8>=6.0.0 
