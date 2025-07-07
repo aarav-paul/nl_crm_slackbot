@@ -1,6 +1,6 @@
 import { 
   UsersIcon, 
-  TrendingUpIcon, 
+  ArrowTrendingUpIcon, 
   ClockIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon
@@ -26,7 +26,7 @@ const stats = [
     value: '43.2%',
     change: '+2.1%',
     changeType: 'increase',
-    icon: TrendingUpIcon,
+    icon: ArrowTrendingUpIcon,
   },
   {
     name: 'Pending Actions',
@@ -70,7 +70,7 @@ const recentActivity = [
     type: 'ai_command',
     message: 'AI processed 12 commands successfully today',
     time: '2 hours ago',
-    icon: TrendingUpIcon,
+    icon: ArrowTrendingUpIcon,
     iconColor: 'text-purple-600',
     bgColor: 'bg-purple-50',
   },
@@ -164,7 +164,7 @@ export default function Dashboard() {
               Create New Lead
             </button>
             <button className="btn btn-secondary w-full justify-start">
-              <TrendingUpIcon className="h-5 w-5 mr-2" />
+              <ArrowTrendingUpIcon className="h-5 w-5 mr-2" />
               Bulk Update Status
             </button>
             <button className="btn btn-secondary w-full justify-start">
